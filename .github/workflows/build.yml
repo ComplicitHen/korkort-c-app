@@ -1,0 +1,51 @@
+name: Bygg APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checka ut kod
+        uses: actions/checkout@v4
+
+      - name: Konfigurera Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Konfigurera Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.6'
+
+      - name: Gör gradlew körbar
+        run: chmod +x gradlew
+
+      - name: Återskapa signeringsnyckel
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 --decode > app/korkort-release.keystore
+
+      - name: Bygg release-APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$GITHUB_WORKSPACE/app/korkort-release.keystore \
+            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+
+      - name: Ladda upp APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: korkort-c-quiz
+          path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 30

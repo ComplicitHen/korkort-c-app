@@ -68,12 +68,6 @@ class QuizActivity : AppCompatActivity() {
             btn.text = q.options.getOrNull(i) ?: ""
             btn.visibility = if (i < q.options.size) View.VISIBLE else View.GONE
             btn.isEnabled = true
-            btn.setBackgroundColor(getColor(com.google.android.material.R.color.m3_sys_color_dynamic_light_primary))
-            btn.setTextColor(Color.WHITE)
-        }
-
-        // reset to default button color
-        optionButtons.forEach { btn ->
             btn.background = getDrawable(R.drawable.btn_option_default)
             btn.setTextColor(getColor(R.color.option_text))
         }

@@ -19,6 +19,7 @@ class QuizActivity : AppCompatActivity() {
     private var score = 0
     private var answered = false
     private lateinit var category: String
+    private val handler = Handler(Looper.getMainLooper())
     private val optionButtons: List<Button> get() =
         listOf(binding.btnA, binding.btnB, binding.btnC, binding.btnD)
 
@@ -68,7 +69,7 @@ class QuizActivity : AppCompatActivity() {
             btn.text = q.options.getOrNull(i) ?: ""
             btn.visibility = if (i < q.options.size) View.VISIBLE else View.GONE
             btn.isEnabled = true
-            btn.background = getDrawable(R.drawable.btn_option_default)
+            btn.setBackgroundResource(R.drawable.btn_option_default)
             btn.setTextColor(getColor(R.color.option_text))
         }
     }
@@ -98,7 +99,7 @@ class QuizActivity : AppCompatActivity() {
         if (currentIndex < questions.size - 1) {
             binding.btnNext.visibility = View.VISIBLE
         } else {
-            Handler(Looper.getMainLooper()).postDelayed({ showResult() }, 1500)
+            handler.postDelayed({ showResult() }, 1500)
         }
     }
 
@@ -115,6 +116,11 @@ class QuizActivity : AppCompatActivity() {
         intent.putExtra("category", category)
         startActivity(intent)
         finish()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacksAndMessages(null)
     }
 
     override fun onSupportNavigateUp(): Boolean {
